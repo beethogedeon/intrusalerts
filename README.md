@@ -2,6 +2,8 @@
 
 This project is an automated surveillance system that detects intruders in camera view and sends notifications to an administrator via email. It leverages a pre-trained YOLOv8 model for object detection and is capable of tracking intruders' movements. When a new intruder is detected, an email notification with images of the intruder is sent to the designated admin email address.
 
+![](./images/image.gif)
+
 ## Project Structure
 
 ```
@@ -20,7 +22,7 @@ This project is an automated surveillance system that detects intruders in camer
 
 ```sh
     git clone https://github.com/beethogedeon/intrusalerts.git
-    ```
+```
 
 2. Install the required dependencies:
 
