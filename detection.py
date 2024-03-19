@@ -1,7 +1,6 @@
 from torch.cuda import is_available
 import os
 import cv2
-from time import time
 from ultralytics import YOLO
 from supervision import LabelAnnotator, Detections, BoxCornerAnnotator, Color
 
