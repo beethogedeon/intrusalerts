@@ -59,7 +59,8 @@ class PersonDetection:
 
     def __call__(self):
         cap = cv2.VideoCapture(self.capture_index)
-        assert cap.isOpened()
+        if not cap.isOpened():
+            raise AssertionError
         cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
         cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 640)
         frame_count = 0
