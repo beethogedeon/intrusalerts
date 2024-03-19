@@ -10,10 +10,10 @@ class PersonDetection:
         self.capture_index = capture_index
         self.currentIntruderDetected = 0
         self.email_notification = email_notification
-        
+
         # Load the model
         self.model = YOLO("./weights/yolov8n.pt")
-        
+
         # Instanciate Supervision Annotators
         self.box_annotator = BoxCornerAnnotator(color=Color.from_hex("#ff0000"),
                                                 thickness=6,
@@ -24,38 +24,38 @@ class PersonDetection:
         self.device = 'cuda:0' if is_available() else 'cpu'
 
     def predict(self, img):
-        
+
         # Detect and track object using YOLOv8 model
         result = self.model.track(img, persist=True, device=self.device)[0]
-        
+
         # Convert result to Supervision Detection object
         detections = Detections.from_ultralytics(result)
-        
+
         # In Yolov8 model, objects with class_id 0 refer to a person. So, we should filter objects detected to only consider person
         detections = detections[detections.class_id == 0]
-        
+
         return detections
-    
+
 
     def plot_bboxes(self, detections: Detections, img):
-        
+
         labels = [f"Intruder #{track_id}" for track_id in detections.tracker_id if len(detections.tracker_id) > 0]
-        
+
         # Add the box to the image
         annotated_image = self.box_annotator.annotate(
             scene=img,
             detections=detections
             )
-        
+
         # Add the label to the image
         annotated_image = self.label_annotator.annotate(
             scene=annotated_image,
             detections=detections,
             labels=labels
         )
-        
+
         return annotated_image
-    
+
 
     def __call__(self):
         cap = cv2.VideoCapture(self.capture_index)
@@ -70,26 +70,26 @@ class PersonDetection:
                 if not ret:
                     print("Failed to grab frame")
                     break
-                
+
 
                 results = self.predict(img)
                 if results:
                     img = self.plot_bboxes(results, img)
-                    
-                    
+
+
                     if len(results.class_id) > self.currentIntruderDetected: # We will send notication only when new person is detected
-                        
+
                         # Let's crop each person detected and save it into images folder
                         for xyxy, track_id in zip(results.xyxy,results.tracker_id):
                             intruImg = img[int(xyxy[1]-25):int(xyxy[3]),int(xyxy[0]):int(xyxy[2])]
                             cv2.imwrite(f"./images/intruder_{track_id}.jpg",intruImg)
-                            
+
                         # Send notification
                         self.email_notification.send_email(len(results.class_id))
-                        
+
                         # Then notification sent, we must delete all previous saved images
                         delete_files("./images/")
-                        
+
                         self.currentIntruderDetected = len(results.class_id)
                 else:
                     self.currentIntruderDetected = 0
@@ -103,12 +103,12 @@ class PersonDetection:
             cap.release()
             cv2.destroyAllWindows()
             self.email_notification.quit()
-            
+
 
 # Function to delete file
 def delete_files(path):
     files = os.listdir(path)
-    
+
     for file in files:
         os.remove(os.path.join(path,file))
-        
+

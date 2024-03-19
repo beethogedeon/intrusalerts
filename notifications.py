@@ -26,13 +26,13 @@ class Notification:
         <p>ALERT - {object_detected} intruder(s) has been detected !!</p>
         '''
         message.attach(MIMEText(message_body, 'html'))
-        
+
         # Attach all images to the message
         for file in os.listdir("./images"):
             img = open(os.path.join("./images/",file), 'rb').read()
             image = MIMEImage(img, name=file)     
             message.attach(image)
-        
+
         # Send the mail
         self.server.sendmail(self.from_email, self.to_email, message.as_string())
 
